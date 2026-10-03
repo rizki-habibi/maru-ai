@@ -1,0 +1,56 @@
+name: Railway Diagnose
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Diagnose repository
+        shell: bash
+        run: |
+          set -u
+          echo "=== Railway / Maru AI Diagnose ==="
+          echo "Commit: $GITHUB_SHA"
+          echo "Branch: $GITHUB_REF_NAME"
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo
+          echo "=== Files ==="
+          find . -maxdepth 4 -type f -not -path './.git/*' -print | sort || true
+          echo
+          echo "=== Expected application files ==="
+          for f in package.json next.config.mjs app/page.js app/layout.js app/globals.css; do
+            if [ -f "$f" ]; then
+              echo "OK  $f"
+            else
+              echo "MISS $f"
+            fi
+          done
+          echo
+          echo "=== Railway config ==="
+          if [ -f railway.toml ]; then
+            echo "FOUND railway.toml"
+            cat railway.toml
+          elif [ -f railway.json ]; then
+            echo "FOUND railway.json"
+            cat railway.json
+          else
+            echo "MISS railway config"
+          fi
+          echo
+          echo "=== Result ==="
+          if [ -f package.json ]; then
+            echo "Repository contains application code/config."
+          else
+            echo "Repository is intentionally empty of application code."
+            echo "If Railway still serves the old Maru AI page, Railway is deploying an old snapshot or is not connected to this branch."
+          fi
