@@ -14,6 +14,7 @@ const pool = process.env.DATABASE_URL ? new Pool({ connectionString: process.env
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use(express.json({ limit: "2mb" }));
+app.use(express.static(path.join(__dirname, "public"), { index: false, extensions: false }));
 
 function userKey(req) { return req.headers["x-maru-user"] || "anonymous"; }
 
