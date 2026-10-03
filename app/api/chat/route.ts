@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     if (!result.r.ok && isSuspendedAccountError(result.r.status, result.detail)) {
       const blockedProvider = providerKey(selectedModel);
       const alternatives = await fetchModels(base);
-      const fallback = alternatives.find((id) => id !== selectedModel && providerKey(id) !== blockedProvider);
+      const fallback = alternatives.find((id: string) => id !== selectedModel && providerKey(id) !== blockedProvider);
 
       if (fallback) {
         selectedModel = fallback;
