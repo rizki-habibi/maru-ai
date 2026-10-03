@@ -3,41 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#212121">
+  <meta name="theme-color" content="#111318">
+  <meta name="description" content="Maru AI — workspace AI terhubung dengan MAX Router dan MAX Editor">
   <title>Maru AI</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='80'>M</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23f4f4f5'/><text x='50' y='70' text-anchor='middle' font-size='62' font-family='Arial' font-weight='800'>M</text></svg>">
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
 <div id="app">
-  <aside class="sidebar">
-    <div class="brand"><span class="brand-mark">M</span><span>Maru AI</span></div>
-    <button id="newChat" class="new-chat">＋ Chat baru</button>
-    <button id="addRepo" class="add-repo">＋ Tambah repo</button>
-    <div class="repo-title">Repository</div>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><span class="brand-mark">M</span><div><strong>Maru AI</strong><small>AI workspace</small></div><button id="closeSidebar" class="sidebar-close" aria-label="Tutup menu">×</button></div>
+
+    <button id="newChat" class="new-chat"><span>＋</span><strong>Chat baru</strong><kbd>Ctrl K</kbd></button>
+
+    <div class="section-label">Workspace</div>
+    <nav class="nav-section">
+      <button class="nav-item active" data-view="chat"><span class="nav-icon">◌</span><span>Chat</span></button>
+      <button class="nav-item" data-view="editor"><span class="nav-icon">⌘</span><span>MAX Editor</span><span class="nav-badge">IDE</span></button>
+      <button class="nav-item" data-view="status"><span class="nav-icon">◉</span><span>Status sistem</span></button>
+    </nav>
+
+    <div class="repo-head"><span>Repository</span><button id="addRepo" class="mini-btn" title="Tambah repository">＋</button></div>
     <div id="repoList" class="repo-list"></div>
-    <div class="nav-section">
-      <button class="nav-item active" data-view="chat">⌕ <span>Chat</span></button>
-      <button class="nav-item" data-view="editor">▣ <span>MAX Editor</span></button>
-      <button class="nav-item" data-view="status">◌ <span>Status sistem</span></button>
-    </div>
-    <div class="history-title">Percakapan</div>
+
+    <div class="history-head"><span>Percakapan</span><button id="clearHistory" class="mini-btn" title="Hapus riwayat">⌫</button></div>
     <div id="history" class="history"></div>
+
     <div class="sidebar-bottom">
       <div class="connection-dot" id="connectionDot"></div>
-      <div><strong id="connectionText">Memeriksa koneksi…</strong><small>MAX Router</small></div>
+      <div class="connection-copy"><strong id="connectionText">Memeriksa koneksi…</strong><small>MAX Router</small></div>
+      <span class="live-dot">LIVE</span>
     </div>
   </aside>
 
   <main class="main">
     <header class="topbar">
-      <button id="mobileMenu" class="icon-btn">☰</button>
-      <div class="model-wrap">
-        <button id="modelButton" class="model-button">Maru AI <span>⌄</span></button>
-        <div id="modelMenu" class="model-menu hidden"></div>
+      <div class="top-left">
+        <button id="mobileMenu" class="icon-btn" aria-label="Buka menu">☰</button>
+        <div class="model-wrap">
+          <button id="modelButton" class="model-button"><span class="model-dot"></span><span>Memuat model…</span><span class="chevron">⌄</span></button>
+          <div id="modelMenu" class="model-menu hidden"></div>
+        </div>
       </div>
       <div class="top-actions">
-        <a id="editorLink" class="top-link" target="_blank" rel="noopener">MAX Editor ↗</a>
+        <span class="secure-label">● Terhubung</span>
+        <a id="editorLink" class="top-link" target="_blank" rel="noopener">Buka Editor <span>↗</span></a>
       </div>
     </header>
 
@@ -45,55 +55,56 @@
       <div id="messages" class="messages">
         <div class="welcome">
           <div class="welcome-mark">M</div>
+          <div class="eyebrow">MARU AI WORKSPACE</div>
           <h1>Apa yang ingin kamu kerjakan?</h1>
-          <p>Maru AI menggunakan MAX Router sebagai gateway model dan MAX Editor untuk pekerjaan coding.</p>
+          <p>Ngobrol, analisis kode, dan kerjakan repository melalui satu workspace yang terhubung ke MAX Router dan MAX Editor.</p>
           <div class="quick-grid">
-            <button data-prompt="Jelaskan cara kerja Maru AI, MAX Router, dan MAX Editor.">Jelaskan arsitektur</button>
-            <button data-prompt="Bantu saya mencari bug pada kode ini.">Cari bug</button>
-            <button data-prompt="Buatkan struktur proyek full-stack yang rapi.">Buat struktur proyek</button>
-            <button data-prompt="Analisis kebutuhan aplikasi saya dan pecah menjadi tugas.">Analisis proyek</button>
+            <button data-prompt="Jelaskan arsitektur Maru AI, MAX Router, dan MAX Editor secara sederhana."><span>✦</span><div><strong>Jelaskan arsitektur</strong><small>Pahami alur sistem</small></div></button>
+            <button data-prompt="Bantu saya mencari bug pada kode ini dan jelaskan cara memperbaikinya."><span>⌁</span><div><strong>Cari bug</strong><small>Debug kode lebih cepat</small></div></button>
+            <button data-prompt="Buatkan struktur proyek full-stack yang rapi dan siap dikembangkan."><span>⌘</span><div><strong>Buat struktur proyek</strong><small>Mulai dari fondasi</small></div></button>
+            <button data-prompt="Analisis kebutuhan aplikasi saya lalu pecah menjadi tugas implementasi yang jelas."><span>◇</span><div><strong>Analisis proyek</strong><small>Ubah ide menjadi tugas</small></div></button>
           </div>
         </div>
       </div>
+
       <form id="composer" class="composer-wrap">
         <div class="composer">
-          <textarea id="input" rows="1" placeholder="Pesan Maru AI…" autocomplete="off"></textarea>
-          <div class="composer-bottom">
-            <div class="composer-hints"><span>Enter untuk kirim</span><span>Shift+Enter untuk baris baru</span></div>
+          <div class="composer-input-row">
+            <textarea id="input" rows="1" placeholder="Tulis pesan untuk Maru AI…" autocomplete="off"></textarea>
             <button id="send" class="send-btn" type="submit" aria-label="Kirim">↑</button>
           </div>
+          <div class="composer-bottom">
+            <div class="composer-hints"><span>Enter kirim</span><span>Shift + Enter baris baru</span></div>
+            <span class="composer-status">Maru AI · MAX Router</span>
+          </div>
         </div>
-        <div class="disclaimer">Maru AI dapat membuat kesalahan. Periksa hasil penting sebelum digunakan.</div>
+        <div class="disclaimer">AI dapat membuat kesalahan. Periksa hasil penting sebelum digunakan.</div>
       </form>
     </section>
 
     <section id="editorView" class="view editor-view">
-      <div class="panel-header"><div><h2>MAX Editor</h2><p>Editor coding yang terhubung ke ekosistem Maru.</p></div><a id="openEditor" class="primary-btn" target="_blank" rel="noopener">Buka MAX Editor ↗</a></div>
-      <div class="editor-card">
-        <div class="editor-placeholder">
-          <div class="editor-logo">M</div>
-          <h2>MAX Editor siap digunakan</h2>
-          <p>Gunakan MAX Editor untuk Monaco Editor, workspace cloud, Git, terminal lokal, dan bantuan AI melalui MAX Router.</p>
-          <a id="editorCardLink" class="primary-btn" target="_blank" rel="noopener">Buka editor</a>
+      <div class="content-shell">
+        <div class="page-title"><div><div class="eyebrow">DEVELOPMENT</div><h2>MAX Editor</h2><p>Workspace coding yang terhubung dengan Maru AI.</p></div><a id="openEditor" class="primary-btn" target="_blank" rel="noopener">Buka MAX Editor <span>↗</span></a></div>
+        <div class="editor-card">
+          <div class="editor-placeholder"><div class="editor-logo">M</div><h2>Siap untuk coding</h2><p>Gunakan Monaco Editor, workspace PostgreSQL, Git, terminal, dan bantuan AI dalam satu lingkungan.</p><a id="editorCardLink" class="primary-btn" target="_blank" rel="noopener">Buka editor <span>↗</span></a></div>
         </div>
       </div>
     </section>
 
     <section id="statusView" class="view">
-      <div class="status-page">
-        <h2>Status sistem</h2>
-        <p>Pemeriksaan koneksi komponen Maru AI.</p>
+      <div class="content-shell status-page">
+        <div class="page-title"><div><div class="eyebrow">SYSTEM</div><h2>Status sistem</h2><p>Pantau koneksi komponen Maru AI.</p></div><button id="refreshStatus" class="secondary-btn">↻ Segarkan</button></div>
         <div id="statusCards" class="status-cards"></div>
-        <button id="refreshStatus" class="secondary-btn">Segarkan</button>
       </div>
     </section>
   </main>
 </div>
+
 <div id="repoModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="repoModalTitle">
   <div class="modal-backdrop" data-close-repo></div>
   <div class="modal-card">
-    <div class="modal-header"><div><h2 id="repoModalTitle">Tambah repository</h2><p>Tambahkan repository GitHub untuk dikerjakan bersama Maru AI dan MAX Editor.</p></div><button id="closeRepo" class="modal-close" aria-label="Tutup">×</button></div>
-    <label class="field-label" for="repoInput">URL atau owner/repository</label>
+    <div class="modal-header"><div><div class="eyebrow">REPOSITORY</div><h2 id="repoModalTitle">Tambah repository</h2><p>Hubungkan repository GitHub yang ingin kamu kerjakan.</p></div><button id="closeRepo" class="modal-close" aria-label="Tutup">×</button></div>
+    <label class="field-label" for="repoInput">URL GitHub</label>
     <input id="repoInput" class="repo-input" placeholder="https://github.com/rizki-habibi/nama-repo" autocomplete="off">
     <div id="repoError" class="repo-error"></div>
     <div class="modal-actions"><button id="cancelRepo" class="secondary-btn">Batal</button><button id="saveRepo" class="primary-btn" type="button">Tambah repository</button></div>
