@@ -13,6 +13,9 @@
   <aside class="sidebar">
     <div class="brand"><span class="brand-mark">M</span><span>Maru AI</span></div>
     <button id="newChat" class="new-chat">＋ Chat baru</button>
+    <button id="addRepo" class="add-repo">＋ Tambah repo</button>
+    <div class="repo-title">Repository</div>
+    <div id="repoList" class="repo-list"></div>
     <div class="nav-section">
       <button class="nav-item active" data-view="chat">⌕ <span>Chat</span></button>
       <button class="nav-item" data-view="editor">▣ <span>MAX Editor</span></button>
@@ -85,6 +88,16 @@
       </div>
     </section>
   </main>
+</div>
+<div id="repoModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="repoModalTitle">
+  <div class="modal-backdrop" data-close-repo></div>
+  <div class="modal-card">
+    <div class="modal-header"><div><h2 id="repoModalTitle">Tambah repository</h2><p>Tambahkan repository GitHub untuk dikerjakan bersama Maru AI dan MAX Editor.</p></div><button id="closeRepo" class="modal-close" aria-label="Tutup">×</button></div>
+    <label class="field-label" for="repoInput">URL atau owner/repository</label>
+    <input id="repoInput" class="repo-input" placeholder="https://github.com/rizki-habibi/nama-repo" autocomplete="off">
+    <div id="repoError" class="repo-error"></div>
+    <div class="modal-actions"><button id="cancelRepo" class="secondary-btn">Batal</button><button id="saveRepo" class="primary-btn" type="button">Tambah repository</button></div>
+  </div>
 </div>
 <script src="/app.js"></script>
 </body>
