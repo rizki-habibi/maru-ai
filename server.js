@@ -26,11 +26,10 @@ function routerHeaders() {
 }
 
 async function routerFetch(endpoint, options = {}) {
-  const response = await fetch(ROUTER_URL + endpoint, {
+  return fetch(ROUTER_URL + endpoint, {
     ...options,
     headers: { ...routerHeaders(), ...(options.headers || {}) }
   });
-  return response;
 }
 
 app.get("/api/health", (_req, res) => {
@@ -65,12 +64,7 @@ app.post("/api/chat", authorized, async (req, res) => {
     return res.status(400).json({ error: "messages wajib berupa array dan tidak boleh kosong." });
   }
 
-  const payload = {
-    model,
-    messages,
-    stream: Boolean(stream),
-    ...rest
-  };
+  const payload = { model, messages, stream: Boolean(stream), ...rest };
   if (temperature !== undefined) payload.temperature = temperature;
   if (max_tokens !== undefined) payload.max_tokens = max_tokens;
 
@@ -87,9 +81,7 @@ app.post("/api/chat", authorized, async (req, res) => {
     res.setHeader("Cache-Control", "no-cache, no-transform");
     res.setHeader("X-Accel-Buffering", "no");
 
-    if (!upstream.body) {
-      return res.end(await upstream.text());
-    }
+    if (!upstream.body) return res.end(await upstream.text());
 
     const reader = upstream.body.getReader();
     try {
@@ -108,7 +100,7 @@ app.post("/api/chat", authorized, async (req, res) => {
   }
 });
 
-app.get("*", (req, res, next) => {
+app.get("/{*splat}", (req, res, next) => {
   if (req.path.startsWith("/api/")) return next();
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
