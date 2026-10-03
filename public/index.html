@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#212121">
+  <title>Maru AI</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='80'>M</text></svg>">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div id="app">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">M</span><span>Maru AI</span></div>
+    <button id="newChat" class="new-chat">＋ Chat baru</button>
+    <div class="nav-section">
+      <button class="nav-item active" data-view="chat">⌕ <span>Chat</span></button>
+      <button class="nav-item" data-view="editor">▣ <span>MAX Editor</span></button>
+      <button class="nav-item" data-view="status">◌ <span>Status sistem</span></button>
+    </div>
+    <div class="history-title">Percakapan</div>
+    <div id="history" class="history"></div>
+    <div class="sidebar-bottom">
+      <div class="connection-dot" id="connectionDot"></div>
+      <div><strong id="connectionText">Memeriksa koneksi…</strong><small>MAX Router</small></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button id="mobileMenu" class="icon-btn">☰</button>
+      <div class="model-wrap">
+        <button id="modelButton" class="model-button">Maru AI <span>⌄</span></button>
+        <div id="modelMenu" class="model-menu hidden"></div>
+      </div>
+      <div class="top-actions">
+        <a id="editorLink" class="top-link" target="_blank" rel="noopener">MAX Editor ↗</a>
+      </div>
+    </header>
+
+    <section id="chatView" class="view active">
+      <div id="messages" class="messages">
+        <div class="welcome">
+          <div class="welcome-mark">M</div>
+          <h1>Apa yang ingin kamu kerjakan?</h1>
+          <p>Maru AI menggunakan MAX Router sebagai gateway model dan MAX Editor untuk pekerjaan coding.</p>
+          <div class="quick-grid">
+            <button data-prompt="Jelaskan cara kerja Maru AI, MAX Router, dan MAX Editor.">Jelaskan arsitektur</button>
+            <button data-prompt="Bantu saya mencari bug pada kode ini.">Cari bug</button>
+            <button data-prompt="Buatkan struktur proyek full-stack yang rapi.">Buat struktur proyek</button>
+            <button data-prompt="Analisis kebutuhan aplikasi saya dan pecah menjadi tugas.">Analisis proyek</button>
+          </div>
+        </div>
+      </div>
+      <form id="composer" class="composer-wrap">
+        <div class="composer">
+          <textarea id="input" rows="1" placeholder="Pesan Maru AI…" autocomplete="off"></textarea>
+          <div class="composer-bottom">
+            <div class="composer-hints"><span>Enter untuk kirim</span><span>Shift+Enter untuk baris baru</span></div>
+            <button id="send" class="send-btn" type="submit" aria-label="Kirim">↑</button>
+          </div>
+        </div>
+        <div class="disclaimer">Maru AI dapat membuat kesalahan. Periksa hasil penting sebelum digunakan.</div>
+      </form>
+    </section>
+
+    <section id="editorView" class="view editor-view">
+      <div class="panel-header"><div><h2>MAX Editor</h2><p>Editor coding yang terhubung ke ekosistem Maru.</p></div><a id="openEditor" class="primary-btn" target="_blank" rel="noopener">Buka MAX Editor ↗</a></div>
+      <div class="editor-card">
+        <div class="editor-placeholder">
+          <div class="editor-logo">M</div>
+          <h2>MAX Editor siap digunakan</h2>
+          <p>Gunakan MAX Editor untuk Monaco Editor, workspace cloud, Git, terminal lokal, dan bantuan AI melalui MAX Router.</p>
+          <a id="editorCardLink" class="primary-btn" target="_blank" rel="noopener">Buka editor</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="statusView" class="view">
+      <div class="status-page">
+        <h2>Status sistem</h2>
+        <p>Pemeriksaan koneksi komponen Maru AI.</p>
+        <div id="statusCards" class="status-cards"></div>
+        <button id="refreshStatus" class="secondary-btn">Segarkan</button>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="/app.js"></script>
+</body>
+</html>
