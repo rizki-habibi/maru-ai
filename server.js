@@ -13,6 +13,8 @@ const pool=process.env.DATABASE_URL?new Pool({connectionString:process.env.DATAB
 const root=path.dirname(fileURLToPath(import.meta.url));
 
 app.use(express.json({limit:"2mb"}));
+app.get("/app.js",(req,res)=>res.sendFile(path.join(root,"public","app.js"),{headers:{"Content-Type":"application/javascript; charset=utf-8"}}));
+app.get("/styles.css",(req,res)=>res.sendFile(path.join(root,"public","styles.css"),{headers:{"Content-Type":"text/css; charset=utf-8"}}));
 app.use(express.static(path.join(root,"public"),{index:"index.html"}));
 
 async function dbInit(){
