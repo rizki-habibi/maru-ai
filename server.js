@@ -79,6 +79,6 @@ app.post("/api/conversations/:id/messages",async(req,res)=>{
     await pool.query("UPDATE maru_conversations SET updated_at=NOW() WHERE id=$1",[req.params.id]);res.status(201).json(r.rows[0]);
   }catch(e){res.status(500).json({error:e.message})}
 });
-app.get("*",(req,res)=>res.sendFile(path.join(root,"public","index.html")));
+app.get("/{*splat}",(req,res)=>res.sendFile(path.join(root,"public","index.html")));
 
 dbInit().then(()=>app.listen(PORT,"0.0.0.0",()=>console.log("[Maru AI] ready on "+PORT))).catch(e=>{console.error(e);process.exit(1)});
