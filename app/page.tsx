@@ -1,4 +1,167 @@
 "use client";
-import {FormEvent,useEffect,useState} from "react";import{Bot,ChevronDown,Menu,Plus,Send,Settings2,Sparkles,X}from"lucide-react";
-type Model={id:string;name?:string;provider?:string};type Message={role:"user"|"assistant";content:string};const starter:Message[]=[{role:"assistant",content:"Halo, saya Maru AI. Terhubung langsung ke MAX Router. Pilih model lalu kirim pesan."}];
-export default function HomePage(){const[models,setModels]=useState<Model[]>([]),[model,setModel]=useState(""),[routerError,setRouterError]=useState(""),[messages,setMessages]=useState(starter),[input,setInput]=useState(""),[busy,setBusy]=useState(false),[sidebar,setSidebar]=useState(true);useEffect(()=>{fetch("/api/models",{cache:"no-store"}).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||"MAX Router tidak dapat diakses.");return d}).then(d=>{const list=Array.isArray(d.models)?d.models.filter((m:Model)=>m?.id):[];setModels(list);setModel(list[0]?.id||"");setRouterError(list.length?"":"MAX Router terhubung tetapi belum mengirim model.")}).catch(e=>{setModels([]);setRouterError(e instanceof Error?e.message:"MAX Router tidak dapat diakses.")})},[]);async function sendMessage(e:FormEvent){e.preventDefault();const text=input.trim();if(!text||busy||!model)return;const next=[...messages,{role:"user"as const,content:text}];setMessages(next);setInput("");setBusy(true);try{const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model,messages:next})});const d=await r.json();if(!r.ok)throw new Error([d.error,d.detail].filter(Boolean).join(": "));setMessages(c=>[...c,{role:"assistant",content:d.message?.content||"MAX Router tidak mengembalikan jawaban."}])}catch(e){setMessages(c=>[...c,{role:"assistant",content:e instanceof Error?e.message:"Terjadi kesalahan."}])}finally{setBusy(false)}}return <main className="shell"><aside className={sidebar?"sidebar open":"sidebar"}><div className="brand"><div className="brand-mark"><Sparkles size={18}/></div><div><strong>Maru AI</strong><span>AI Workspace</span></div><button className="icon-button mobile-only"onClick={()=>setSidebar(false)}aria-label="Tutup menu"><X size={18}/></button></div><button className="new-chat"onClick={()=>setMessages(starter)}><Plus size={17}/> Chat baru</button><div className="nav-section"><span>Workspace</span><button className="nav-item active"><Bot size={17}/> Percakapan</button><button className="nav-item"><Settings2 size={17}/> Pengaturan</button></div><div className="sidebar-footer"><span>Koneksi</span><strong>MAX Router</strong><small>{routerError||(models.length?models.length+" model tersedia":"Menghubungkan...")}</small></div></aside><section className="content"><header className="topbar"><button className="icon-button"onClick={()=>setSidebar(v=>!v)}aria-label="Menu"><Menu size={20}/></button><div className="model-picker"><select value={model}onChange={e=>setModel(e.target.value)}aria-label="Pilih model"disabled={!models.length}>{!models.length&&<option value="">Menghubungkan MAX Router...</option>}{models.map(m=><option key={m.id}value={m.id}>{m.name||m.id}</option>)}</select><ChevronDown size={15}/></div><div className="status"><span/>{models.length?"MAX Router Online":"Menghubungkan"}</div></header><div className="chat"><div className="message-list">{routerError&&<article className="message assistant"><div className="avatar"><X size={16}/></div><div className="bubble">{routerError}</div></article>}{messages.map((m,i)=><article key={i}className={m.role==="user"?"message user":"message assistant"}><div className="avatar">{m.role==="assistant"?<Sparkles size={16}/>:`Kamu`}</div><div className="bubble">{m.content}</div></article>)}{busy&&<article className="message assistant"><div className="avatar"><Sparkles size={16}/></div><div className="bubble typing">MAX Router sedang memproses...</div></article>}</div></div><form className="composer-wrap"onSubmit={sendMessage}><div className="composer"><textarea value={input}onChange={e=>setInput(e.target.value)}placeholder={models.length?"Tulis pesan untuk Maru AI...":"Menunggu koneksi MAX Router..."}rows={1}disabled={!models.length}/><button className="send"disabled={busy||!input.trim()||!model}aria-label="Kirim"><Send size={18}/></button></div><p>Maru AI mengirim percakapan langsung ke MAX Router.</p></form></section></main>}
+
+import { FormEvent, useEffect, useState } from "react";
+import { Bot, ChevronDown, Menu, Plus, Send, Settings2, Sparkles, X } from "lucide-react";
+
+type Model = { id: string; name?: string; provider?: string };
+type Message = { role: "user" | "assistant"; content: string };
+
+const starter: Message[] = [{
+  role: "assistant",
+  content: "Halo, saya Maru AI. Terhubung langsung ke MAX Router. Pilih model lalu kirim pesan."
+}];
+
+function providerKey(model: string) {
+  const slash = model.indexOf("/");
+  return slash > 0 ? model.slice(0, slash) : "";
+}
+
+export default function HomePage() {
+  const [models, setModels] = useState<Model[]>([]);
+  const [model, setModel] = useState("");
+  const [routerError, setRouterError] = useState("");
+  const [messages, setMessages] = useState(starter);
+  const [input, setInput] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [sidebar, setSidebar] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/models", { cache: "no-store" })
+      .then(async (r) => {
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || "MAX Router tidak dapat diakses.");
+        return d;
+      })
+      .then((d) => {
+        const list = Array.isArray(d.models)
+          ? d.models.filter((m: Model) => m?.id)
+          : [];
+        setModels(list);
+        setModel(list[0]?.id || "");
+        setRouterError(list.length ? "" : "MAX Router terhubung tetapi belum mengirim model.");
+      })
+      .catch((e) => {
+        setModels([]);
+        setRouterError(e instanceof Error ? e.message : "MAX Router tidak dapat diakses.");
+      });
+  }, []);
+
+  async function sendMessage(e: FormEvent) {
+    e.preventDefault();
+    const text = input.trim();
+    if (!text || busy || !model) return;
+
+    const next = [...messages, { role: "user" as const, content: text }];
+    setMessages(next);
+    setInput("");
+    setBusy(true);
+
+    try {
+      const r = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model, messages: next }),
+      });
+      const d = await r.json();
+
+      if (!r.ok) {
+        throw new Error([d.error, d.detail].filter(Boolean).join(": "));
+      }
+
+      // If the server had to escape a suspended provider, keep the UI on the
+      // working fallback model for the next message.
+      if (d.model && d.model !== model) {
+        setModel(d.model);
+        setRouterError("Model sebelumnya bermasalah; Maru AI beralih ke provider lain.");
+      } else {
+        setRouterError("");
+      }
+
+      setMessages((c) => [...c, {
+        role: "assistant",
+        content: d.message?.content || "MAX Router tidak mengembalikan jawaban."
+      }]);
+    } catch (e) {
+      setMessages((c) => [...c, {
+        role: "assistant",
+        content: e instanceof Error ? e.message : "Terjadi kesalahan."
+      }]);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <main className="shell">
+      <aside className={sidebar ? "sidebar open" : "sidebar"}>
+        <div className="brand">
+          <div className="brand-mark"><Sparkles size={18} /></div>
+          <div><strong>Maru AI</strong><span>AI Workspace</span></div>
+          <button className="icon-button mobile-only" onClick={() => setSidebar(false)} aria-label="Tutup menu"><X size={18} /></button>
+        </div>
+        <button className="new-chat" onClick={() => setMessages(starter)}><Plus size={17} /> Chat baru</button>
+        <div className="nav-section">
+          <span>Workspace</span>
+          <button className="nav-item active"><Bot size={17} /> Percakapan</button>
+          <button className="nav-item"><Settings2 size={17} /> Pengaturan</button>
+        </div>
+        <div className="sidebar-footer">
+          <span>Koneksi</span>
+          <strong>MAX Router</strong>
+          <small>{routerError || (models.length ? models.length + " model tersedia" : "Menghubungkan...")}</small>
+        </div>
+      </aside>
+
+      <section className="content">
+        <header className="topbar">
+          <button className="icon-button" onClick={() => setSidebar(v => !v)} aria-label="Menu"><Menu size={20} /></button>
+          <div className="model-picker">
+            <select value={model} onChange={e => setModel(e.target.value)} aria-label="Pilih model" disabled={!models.length}>
+              {!models.length && <option value="">Menghubungkan MAX Router...</option>}
+              {models.map(m => <option key={m.id} value={m.id}>{m.name || m.id}</option>)}
+            </select>
+            <ChevronDown size={15} />
+          </div>
+          <div className="status"><span />{models.length ? "MAX Router Online" : "Menghubungkan"}</div>
+        </header>
+
+        <div className="chat">
+          <div className="message-list">
+            {routerError && (
+              <article className="message assistant">
+                <div className="avatar"><X size={16} /></div>
+                <div className="bubble">{routerError}</div>
+              </article>
+            )}
+            {messages.map((m, i) => (
+              <article key={i} className={m.role === "user" ? "message user" : "message assistant"}>
+                <div className="avatar">{m.role === "assistant" ? <Sparkles size={16} /> : "Kamu"}</div>
+                <div className="bubble">{m.content}</div>
+              </article>
+            ))}
+            {busy && (
+              <article className="message assistant">
+                <div className="avatar"><Sparkles size={16} /></div>
+                <div className="bubble typing">MAX Router sedang memproses...</div>
+              </article>
+            )}
+          </div>
+        </div>
+
+        <form className="composer-wrap" onSubmit={sendMessage}>
+          <div className="composer">
+            <textarea
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              placeholder={models.length ? "Tulis pesan untuk Maru AI..." : "Menunggu koneksi MAX Router..."}
+              rows={1}
+              disabled={!models.length}
+            />
+            <button className="send" disabled={busy || !input.trim() || !model} aria-label="Kirim"><Send size={18} /></button>
+          </div>
+          <p>Maru AI mengirim percakapan langsung ke MAX Router.</p>
+        </form>
+      </section>
+    </main>
+  );
+}
