@@ -1,4 +1,4 @@
-const state={messages:[],models:[],model:"",history:JSON.parse(localStorage.getItem("maru.history")||"[]"),routerUrl:"",editorUrl:"",busy:false};
+const state={messages:[],models:[],model:"",history:JSON.parse(localStorage.getItem("maru.history")||"[]"),repos:JSON.parse(localStorage.getItem("maru.repos")||"[]"),routerUrl:"",editorUrl:"",busy:false};
 const $=id=>document.getElementById(id);
 const messages=$("messages"),input=$("input"),send=$("send");
 
@@ -68,6 +68,28 @@ input.addEventListener("input",()=>{input.style.height="auto";input.style.height
 $("modelButton").onclick=()=>$("modelMenu").classList.toggle("hidden");
 document.addEventListener("click",e=>{if(!e.target.closest(".model-wrap"))$("modelMenu").classList.add("hidden")});
 document.querySelectorAll(".quick-grid button").forEach(b=>b.onclick=()=>{input.value=b.dataset.prompt;input.focus()});
+function normalizeRepo(value){
+  let v=value.trim().replace(/\.git$/,"").replace(/\/$/,"");
+  v=v.replace(/^https?:\/\/(www\.)?github\.com\//,"");
+  const m=v.match(/^([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)$/);
+  return m?{name:m[2],fullName:m[1]+"/"+m[2],url:"https://github.com/"+m[1]+"/"+m[2]}:null;
+}
+function renderRepos(){
+  const list=$("repoList");if(!list)return;list.innerHTML="";
+  if(!state.repos.length){list.innerHTML='<div class="repo-empty">Belum ada repo</div>';return}
+  state.repos.forEach((repo,i)=>{
+    const row=document.createElement("div");row.className="repo-item";
+    row.innerHTML='<div class="repo-icon">⌘</div><button class="repo-name" title="'+escapeHtml(repo.fullName)+'">'+escapeHtml(repo.name)+'<small>'+escapeHtml(repo.fullName)+'</small></button><button class="repo-remove" title="Hapus repo" aria-label="Hapus '+escapeHtml(repo.name)+'">×</button>';
+    row.querySelector(".repo-name").onclick=()=>window.open(repo.url,"_blank","noopener");
+    row.querySelector(".repo-remove").onclick=()=>{state.repos.splice(i,1);localStorage.setItem("maru.repos",JSON.stringify(state.repos));renderRepos()};
+    list.appendChild(row);
+  });
+}
+function openRepoModal(){$("repoModal").classList.remove("hidden");$("repoError").textContent="";setTimeout(()=>$("repoInput").focus(),0)}
+function closeRepoModal(){$("repoModal").classList.add("hidden")}
+$("addRepo").onclick=openRepoModal;$("closeRepo").onclick=closeRepoModal;$("cancelRepo").onclick=closeRepoModal;document.querySelector("[data-close-repo]").onclick=closeRepoModal;
+$("repoInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("saveRepo").click()});
+$("saveRepo").onclick=()=>{const repo=normalizeRepo($("repoInput").value);if(!repo){$("repoError").textContent="Masukkan URL GitHub atau format owner/repository yang valid.";return}if(state.repos.some(x=>x.fullName.toLowerCase()===repo.fullName.toLowerCase())){$("repoError").textContent="Repository sudah ditambahkan.";return}state.repos.unshift(repo);state.repos=state.repos.slice(0,20);localStorage.setItem("maru.repos",JSON.stringify(state.repos));renderRepos();closeRepoModal()};
 $("newChat").onclick=()=>{state.messages=[];messages.innerHTML='<div class="welcome"><div class="welcome-mark">M</div><h1>Apa yang ingin kamu kerjakan?</h1><p>Mulai percakapan baru dengan Maru AI.</p></div>';input.focus()};
 document.querySelectorAll(".nav-item").forEach(b=>b.onclick=()=>switchView(b.dataset.view));
 function switchView(view){document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));$(view+"View").classList.add("active");document.querySelectorAll(".nav-item").forEach(x=>x.classList.toggle("active",x.dataset.view===view));}
@@ -81,5 +103,5 @@ async function loadStatus(){
     ["MAX Editor","TERHUBUNG","Endpoint: "+h.editor]
   ].map(x=>'<div class="status-card"><strong>'+escapeHtml(x[0])+' · '+escapeHtml(x[1])+'</strong><span>'+escapeHtml(x[2])+"</span></div>").join("")}catch(e){cards.innerHTML='<div class="status-card"><strong>Gagal</strong><span>'+escapeHtml(e.message)+"</span></div>"}
 }
-renderHistory();
+renderHistory();renderRepos();
 (async()=>{try{await loadConfig();await loadModels();await loadStatus()}catch(e){setConnection(false,e.message)}})();
