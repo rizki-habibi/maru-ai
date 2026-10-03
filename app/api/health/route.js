@@ -1,0 +1,1 @@
+import {NextResponse} from "next/server";export async function GET(){return NextResponse.json({ok:true,service:"maru-ai",router:!!process.env.MAX_ROUTER_URL,editor:process.env.MAX_EDITOR_URL||""})}

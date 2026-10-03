@@ -1,0 +1,1 @@
+import {NextResponse } from "next/server";export async function GET(){try{const base=(process.env.MAX_ROUTER_URL||"").replace(/\/$/,"");if(!base)return NextResponse.json({data:[]});const r=await fetch(base+"/models",{cache:"no-store"});const d=await r.json();return NextResponse.json(d,{status:r.status})}catch(e){return NextResponse.json({data:[],error:e.message},{status:502})}}
