@@ -1,56 +1,62 @@
 name: Railway Diagnose
 
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+on: [push, workflow_dispatch]
 
 permissions:
   contents: read
 
 jobs:
   diagnose:
+    name: Diagnose GitHub source for Railway
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    timeout-minutes: 5
 
-      - name: Diagnose repository
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Inspect source
         shell: bash
         run: |
-          set -u
-          echo "=== Railway / Maru AI Diagnose ==="
-          echo "Commit: $GITHUB_SHA"
-          echo "Branch: $GITHUB_REF_NAME"
-          echo "Repository: $GITHUB_REPOSITORY"
+          set -euo pipefail
+          echo "=== SOURCE IDENTITY ==="
+          echo "Repository: ${GITHUB_REPOSITORY}"
+          echo "Branch:     ${GITHUB_REF_NAME}"
+          echo "Commit:     ${GITHUB_SHA}"
           echo
-          echo "=== Files ==="
-          find . -maxdepth 4 -type f -not -path './.git/*' -print | sort || true
+          echo "=== FILES ==="
+          find . -type f -not -path './.git/*' -print | sort
           echo
-          echo "=== Expected application files ==="
-          for f in package.json next.config.mjs app/page.js app/layout.js app/globals.css; do
-            if [ -f "$f" ]; then
-              echo "OK  $f"
+          echo "=== APPLICATION CHECK ==="
+          missing=0
+          for file in package.json next.config.mjs app/page.js app/layout.js app/globals.css; do
+            if [ -f "$file" ]; then
+              echo "OK:   $file"
             else
-              echo "MISS $f"
+              echo "MISS: $file"
+              missing=1
             fi
           done
           echo
-          echo "=== Railway config ==="
+          echo "=== RAILWAY CONFIG CHECK ==="
           if [ -f railway.toml ]; then
-            echo "FOUND railway.toml"
-            cat railway.toml
+            echo "FOUND: railway.toml"
+            sed -n '1,220p' railway.toml
           elif [ -f railway.json ]; then
-            echo "FOUND railway.json"
-            cat railway.json
+            echo "FOUND: railway.json"
+            sed -n '1,220p' railway.json
           else
-            echo "MISS railway config"
+            echo "INFO: no Railway config file"
           fi
           echo
-          echo "=== Result ==="
-          if [ -f package.json ]; then
-            echo "Repository contains application code/config."
+          echo "=== RESULT ==="
+          if [ "$missing" -eq 0 ]; then
+            echo "RESULT: Next.js application files are present."
+            echo "If Railway serves another application, inspect Railway source/commit selection."
           else
-            echo "Repository is intentionally empty of application code."
-            echo "If Railway still serves the old Maru AI page, Railway is deploying an old snapshot or is not connected to this branch."
+            echo "RESULT: Expected Next.js files are absent."
+            echo "Repository does not contain the old Maru AI application."
+            echo "If Railway still serves the old app, it is using an old snapshot or another source."
           fi
