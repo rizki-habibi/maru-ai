@@ -90,9 +90,11 @@ function closeRepoModal(){$("repoModal").classList.add("hidden")}
 $("addRepo").onclick=openRepoModal;$("closeRepo").onclick=closeRepoModal;$("cancelRepo").onclick=closeRepoModal;document.querySelector("[data-close-repo]").onclick=closeRepoModal;
 $("repoInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("saveRepo").click()});
 $("saveRepo").onclick=()=>{const repo=normalizeRepo($("repoInput").value);if(!repo){$("repoError").textContent="Masukkan URL GitHub atau format owner/repository yang valid.";return}if(state.repos.some(x=>x.fullName.toLowerCase()===repo.fullName.toLowerCase())){$("repoError").textContent="Repository sudah ditambahkan.";return}state.repos.unshift(repo);state.repos=state.repos.slice(0,20);localStorage.setItem("maru.repos",JSON.stringify(state.repos));renderRepos();closeRepoModal()};
+$("clearHistory").onclick=()=>{state.history=[];localStorage.removeItem("maru.history");renderHistory()};
+$("closeSidebar").onclick=()=>document.querySelector(".sidebar").classList.remove("open");
 $("newChat").onclick=()=>{state.messages=[];messages.innerHTML='<div class="welcome"><div class="welcome-mark">M</div><h1>Apa yang ingin kamu kerjakan?</h1><p>Mulai percakapan baru dengan Maru AI.</p></div>';input.focus()};
 document.querySelectorAll(".nav-item").forEach(b=>b.onclick=()=>switchView(b.dataset.view));
-function switchView(view){document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));$(view+"View").classList.add("active");document.querySelectorAll(".nav-item").forEach(x=>x.classList.toggle("active",x.dataset.view===view));}
+function switchView(view){document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));$(view+"View").classList.add("active");document.querySelectorAll(".nav-item").forEach(x=>x.classList.toggle("active",x.dataset.view===view));document.querySelector(".sidebar").classList.remove("open");}
 $("mobileMenu").onclick=()=>document.querySelector(".sidebar").classList.toggle("open");
 $("refreshStatus").onclick=loadStatus;
 async function loadStatus(){
